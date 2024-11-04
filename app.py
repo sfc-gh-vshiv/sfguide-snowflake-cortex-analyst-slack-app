@@ -19,19 +19,16 @@ load_dotenv()
 
 USER = os.getenv("USER")
 ACCOUNT = os.getenv("ACCOUNT")
-ANALYST_ENDPOINT = os.getenv("ANALYST_ENDPOINT")
-RSA_PRIVATE_KEY_PATH = os.getenv("RSA_PRIVATE_KEY_PATH")
-HOST = os.getenv("HOST")
 DATABASE = os.getenv("DATABASE")
 SCHEMA = os.getenv("SCHEMA")
-WAREHOUSE = os.getenv("WAREHOUSE")
 PASSWORD = os.getenv("PASSWORD")
-ROLE = os.getenv("ROLE")
+ANALYST_ENDPOINT = os.getenv("ANALYST_ENDPOINT")
+RSA_PRIVATE_KEY_PATH = os.getenv("RSA_PRIVATE_KEY_PATH")
 STAGE = os.getenv("SEMANTIC_MODEL_STAGE")
 FILE = os.getenv("SEMANTIC_MODEL_FILE")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-ENABLE_CHARTS = True
+ENABLE_CHARTS = False
 
 # Initializes app
 app = App(token=SLACK_BOT_TOKEN)
@@ -82,7 +79,7 @@ def say_question(prompt,say):
                 "type": "section",
                 "text": {
                     "type": "plain_text",
-                    "text": ":dash_board: Snowflake Cortex Analyst is generating a response. Please wait...",
+                    "text": "Snowflake Cortex Analyst is generating a response. Please wait...",
                 }
             },
             {
@@ -241,10 +238,7 @@ def init():
     conn = snowflake.connector.connect(
         user=USER,
         password=PASSWORD,
-        account=ACCOUNT,
-        warehouse=WAREHOUSE,
-        role=ROLE,
-        host=HOST
+        account=ACCOUNT
     )
     jwt = generate_jwt.JWTGenerator(ACCOUNT,USER,RSA_PRIVATE_KEY_PATH).get_token()
     return conn,jwt
