@@ -54,7 +54,7 @@ def process_analyst_message(prompt, say) -> Any:
     say_question(prompt, say)
     response = query_cortex_analyst(prompt)
     content = response["message"]["content"]
-    display_analyst_content(content, prompt, say)
+    display_analyst_content(content, say)
 
 def say_question(prompt,say):
     say(
@@ -104,7 +104,7 @@ def query_cortex_analyst(prompt) -> Dict[str, Any]:
         },
     )
     request_id = resp.headers.get("X-Snowflake-Request-Id")
-    if resp.status_code < 400:
+    if resp.status_code == 200:
         return {**resp.json(), "request_id": request_id}  
     else:
         raise Exception(
@@ -113,7 +113,6 @@ def query_cortex_analyst(prompt) -> Dict[str, Any]:
 
 def display_analyst_content(
     content: List[Dict[str, str]],
-    prompt=None,
     say=None
 ) -> None:
     for item in content:
