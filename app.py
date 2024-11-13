@@ -36,8 +36,19 @@ messages = []
 
 @app.message("hello")
 def message_hello(message, say):
-    say(f"Hey there <@{message['user']}>! How can I help you?")
-
+    say(f"Hey there <@{message['user']}>!")
+    say(
+        text = "Let's BUILD",
+        blocks = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": f":snowflake: Let's BUILD!",
+                }
+            },
+        ]                
+    )
 @app.event("message")
 def handle_message_events(ack, body, say):
     ack()
@@ -213,7 +224,7 @@ def plot_chart(df):
 
     # upload image file to slack
     file_upload_url_response = app.client.files_getUploadURLExternal(filename=file_path_jpg,length=file_size)
-    # print(file_upload_url_response)
+    print(file_upload_url_response)
     file_upload_url = file_upload_url_response['upload_url']
     file_id = file_upload_url_response['file_id']
     with open(file_path_jpg, 'rb') as f:
@@ -226,9 +237,9 @@ def plot_chart(df):
     else:
         # complete upload and get permalink to display
         response = app.client.files_completeUploadExternal(files=[{"id":file_id, "title":"chart"}])
-        # print(response)
+        print(response)
         img_url = response['files'][0]['permalink']
-        time.sleep(1)
+        time.sleep(2)
     
     return img_url
 
@@ -239,11 +250,15 @@ def init():
         password=PASSWORD,
         account=ACCOUNT
     )
+    
     jwt = generate_jwt.JWTGenerator(ACCOUNT,USER,RSA_PRIVATE_KEY_PATH).get_token()
     return conn,jwt
 
 # Start app
 if __name__ == "__main__":
     CONN,JWT = init()
+    if not CONN.rest.token:
+        print("Error: Failed to connect to Snowflake! Please check your Snowflake user, password, and account environment variables and try again.")
+        quit()
     Root = Root(CONN)
     SocketModeHandler(app, SLACK_APP_TOKEN).start()
