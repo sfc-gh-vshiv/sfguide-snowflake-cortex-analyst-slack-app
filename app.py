@@ -29,6 +29,7 @@ FILE = os.getenv("SEMANTIC_MODEL_FILE")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 ENABLE_CHARTS = False
+DEBUG = False
 
 # Initializes app
 app = App(token=SLACK_BOT_TOKEN)
@@ -49,13 +50,14 @@ def message_hello(message, say):
             },
         ]                
     )
+
 @app.event("message")
 def handle_message_events(ack, body, say):
     ack()
     prompt = body['event']['text']
     process_analyst_message(prompt, say)
 
-@app.command("/askcortex")
+@app.command("/asksnowflake")
 def ask_cortex(ack, body, say):
     ack()
     prompt = body['text']
@@ -104,6 +106,8 @@ def query_cortex_analyst(prompt) -> Dict[str, Any]:
         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
         "semantic_model_file": f"@{DATABASE}.{SCHEMA}.{STAGE}/{FILE}",
     }
+    if DEBUG:
+        print(request_body)
     resp = requests.post(
         url=f"{ANALYST_ENDPOINT}",
         json=request_body,
@@ -116,6 +120,8 @@ def query_cortex_analyst(prompt) -> Dict[str, Any]:
     )
     request_id = resp.headers.get("X-Snowflake-Request-Id")
     if resp.status_code == 200:
+        if DEBUG:
+            print(resp.text)
         return {**resp.json(), "request_id": request_id}  
     else:
         raise Exception(
@@ -126,6 +132,8 @@ def display_analyst_content(
     content: List[Dict[str, str]],
     say=None
 ) -> None:
+    if DEBUG:
+        print(content)
     for item in content:
         if item["type"] == "sql":
             say(
@@ -199,6 +207,47 @@ def display_analyst_content(
                             }
                         ]
                     )
+        elif item["type"] == "text":
+            say(
+                text = "Answer:",
+                blocks = [
+                    {
+                        "type": "rich_text",
+                        "elements": [
+                            {
+                                "type": "rich_text_quote",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": f"{item['text']}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            )
+        elif item["type"] == "suggestions":
+            suggestions = "You may try these suggested questions: \n\n- " + "\n- ".join(item['suggestions']) + "\n\nNOTE: There's a 150 char limit on Slack messages so alter the questions accordingly."
+            say(
+                text = "Suggestions:",
+                blocks = [
+                    {
+                        "type": "rich_text",
+                        "elements": [
+                            {
+                                "type": "rich_text_preformatted",
+                                "elements": [
+                                    {
+                                        "type": "text",
+                                        "text": f"{suggestions}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            )               
 
 def plot_chart(df):
     plt.figure(figsize=(10, 6), facecolor='#333333')
@@ -224,7 +273,8 @@ def plot_chart(df):
 
     # upload image file to slack
     file_upload_url_response = app.client.files_getUploadURLExternal(filename=file_path_jpg,length=file_size)
-    print(file_upload_url_response)
+    if DEBUG:
+        print(file_upload_url_response)
     file_upload_url = file_upload_url_response['upload_url']
     file_id = file_upload_url_response['file_id']
     with open(file_path_jpg, 'rb') as f:
@@ -237,7 +287,8 @@ def plot_chart(df):
     else:
         # complete upload and get permalink to display
         response = app.client.files_completeUploadExternal(files=[{"id":file_id, "title":"chart"}])
-        print(response)
+        if DEBUG:
+            print(response)
         img_url = response['files'][0]['permalink']
         time.sleep(2)
     
