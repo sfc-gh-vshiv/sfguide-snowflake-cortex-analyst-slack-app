@@ -4,3 +4,8 @@ rsa_key.p8
 .DS_Store
 pie_chart.jpg
 __pycache__/generate_jwt.cpython-311.pyc
+cortex.yaml
+Dockerfile
+__pycache__/cortex_chat.cpython-311.pyc
+chart.jpg
+slack_bot.sh
