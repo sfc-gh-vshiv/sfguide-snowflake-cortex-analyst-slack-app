@@ -30,7 +30,7 @@ DEBUG = False
 # Initialize Slack App
 app = App(token=SLACK_BOT_TOKEN)
 
-# Initialize Snowflake and CortexClient
+# Initialize Snowflake and CortexChat
 conn = snowflake.connector.connect(
     user=USER,
     authenticator="SNOWFLAKE_JWT",
