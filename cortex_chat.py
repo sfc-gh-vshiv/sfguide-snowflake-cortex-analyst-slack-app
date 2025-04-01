@@ -15,6 +15,15 @@ class CortexChat:
     def generate_jwt(self):
         """Generate a new JWT token."""
         return generate_jwt.JWTGenerator(self.account, self.user, self.rsa_private_key_path).get_token()
+    
+    def print_vars(self):
+        filtered_vars = {k: v for k, v in self.__dict__.items() if k != "jwt"}
+        print(f"\nVars passed to Cortex Chat Class: \n")
+        for key, value in filtered_vars.items():
+            print(f"{key}: {value}")
+        print(f"\n{'-'*50}\n")
+        
+
 
     def query_cortex_analyst(self, prompt) -> dict[str, any]:
         """Query Snowflake Cortex API with proper JWT handling."""

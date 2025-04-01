@@ -3,8 +3,8 @@ tables:
   - name: SUPPORT_TICKETS
     description: A logical table capturing support tickets data.
     base_table:
-      database: DASH_DB
-      schema: DASH_SCHEMA
+      database: quickstarts
+      schema: cortex_slack
       table: SUPPORT_TICKETS
 
     dimensions:

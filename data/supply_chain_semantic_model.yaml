@@ -5,8 +5,8 @@ tables:
     description: Average shipping time in days of tire orders for each vendor.
 
     base_table:
-      database: dash_db
-      schema: dash_schema
+      database: quickstarts
+      schema: cortex_slack
       table: supply_chain
 
     dimensions:

@@ -6,26 +6,47 @@ import snowflake.connector
 import requests
 import pandas as pd
 from snowflake.core import Root
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 import matplotlib
 import time
 import matplotlib.pyplot as plt 
 from cortex_chat import CortexChat
 
 matplotlib.use('Agg')
-load_dotenv()
 
-# Environment Variables
-USER = os.getenv("USER")
-ACCOUNT = os.getenv("ACCOUNT")
-ANALYST_ENDPOINT = os.getenv("ANALYST_ENDPOINT")
-RSA_PRIVATE_KEY_PATH = os.getenv("RSA_PRIVATE_KEY_PATH")
-SUPPORT_TICKETS_SEMANTIC_MODEL = os.getenv("SUPPORT_TICKETS_SEMANTIC_MODEL")
-SUPPLY_CHAIN_SEMANTIC_MODEL = os.getenv("SUPPLY_CHAIN_SEMANTIC_MODEL")
-SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
-SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-ENABLE_CHARTS = False
-DEBUG = False
+# # Environment Variables
+# Read the .env file using dotenv_values()
+env_vars = dotenv_values(".env")
+
+# Extract the variables from the loaded dictionary
+USER = env_vars.get("USER")
+ACCOUNT = env_vars.get("ACCOUNT")
+PASSWORD = env_vars.get("PASSWORD")
+ROLE = env_vars.get("ROLE")
+WAREHOUSE = env_vars.get("WAREHOUSE")
+
+ANALYST_ENDPOINT = env_vars.get("ANALYST_ENDPOINT")
+RSA_PRIVATE_KEY_PATH = env_vars.get("RSA_PRIVATE_KEY_PATH")
+
+SUPPORT_TICKETS_SEMANTIC_MODEL = env_vars.get("SUPPORT_TICKETS_SEMANTIC_MODEL")
+SUPPLY_CHAIN_SEMANTIC_MODEL = env_vars.get("SUPPLY_CHAIN_SEMANTIC_MODEL")
+
+SLACK_APP_TOKEN = env_vars.get("SLACK_APP_TOKEN")
+SLACK_BOT_TOKEN = env_vars.get("SLACK_BOT_TOKEN")
+
+ENABLE_CHARTS = True
+DEBUG = True
+DASHES = '-'*50
+
+# Optionally, you can print them to verify
+if DEBUG:
+    print(f"\n{DASHES}\n")
+    print("Setting the following environment variables:")
+    for key, value in env_vars.items():
+        if key != "PASSWORD":  # Exclude printing the password
+            print(f"{key}={value}")
+    print(f"\n{DASHES}\n")
+
 
 # Initialize Slack App
 app = App(token=SLACK_BOT_TOKEN)
@@ -35,9 +56,15 @@ conn = snowflake.connector.connect(
     user=USER,
     authenticator="SNOWFLAKE_JWT",
     private_key_file=RSA_PRIVATE_KEY_PATH,
-    account=ACCOUNT
+    account=ACCOUNT,
+    role=ROLE,
+    warehouse=WAREHOUSE
 )
 cortex_chat = CortexChat(ACCOUNT, USER, RSA_PRIVATE_KEY_PATH, ANALYST_ENDPOINT, SUPPORT_TICKETS_SEMANTIC_MODEL, SUPPLY_CHAIN_SEMANTIC_MODEL)
+
+if DEBUG:
+    cortex_chat.print_vars()
+
 
 Root = Root(conn)
 
