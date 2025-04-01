@@ -1,10 +1,10 @@
-create database DASH_DB;
-create schema DASH_SCHEMA;
+create database if not exists quickstarts;
+create schema cortex_slack;
 
-use DASH_DB.DASH_SCHEMA;
+use quickstarts.cortex_slack;
 
-create or replace warehouse DASH_S WAREHOUSE_SIZE = SMALL;
-use warehouse DASH_S;
+create or replace warehouse cortex_slack_wh WAREHOUSE_SIZE = SMALL;
+use warehouse cortex_slack_wh;
 
 create or replace stage SEMANTIC_MODELS encryption = (TYPE = 'SNOWFLAKE_SSE') directory = ( ENABLE = true );
 
